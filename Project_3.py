@@ -7,6 +7,8 @@ import os
 '''Step 1: Object Masking'''
 
 # Mount Google Drive
+# !fusermount -u /content/drive
+# !rm -rf /content/drive
 # drive.mount('/content/drive')
 
 # Define the path to your image in Google Drive
@@ -65,3 +67,49 @@ plt.title("Final Extracted Motherboard Image")
 plt.imshow(cv2.cvtColor(cropped_image, cv2.COLOR_BGR2RGB))
 plt.axis("off")
 plt.show()
+
+'''Installing Ultralytics for Google Colab'''
+
+# !pip install ultralytics
+
+'''Step 2: YOLOv8 Training'''
+
+from ultralytics import YOLO
+
+# Load YOLOv8 Nano model
+model = YOLO('yolov8n.pt')
+
+# Train the model
+model.train(
+    data = '/content/drive/MyDrive/Dataset_3/Project3Data/data/data.yaml',
+    epochs = 150,                    # epochs
+    batch  = 8,                     # batch size
+    imgsz  = 900,                    # image size
+    lr0 = 0.0003,                    # learning rate
+    optimizer = 'AdamW',             # optimizer
+    weight_decay = 0.001,            # Regularization
+    augment = True,
+    amp = True,
+    name = '/content/drive/MyDrive/Dataset_3/motherboard_model'
+)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
