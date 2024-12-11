@@ -93,9 +93,37 @@ model.train(
     name = '/content/drive/MyDrive/Dataset_3/motherboard_model'
 )
 
+'''Step 3: YOLOv8 Evaluation'''
 
+from ultralytics import YOLO
+from IPython.display import Image, display
+import os
 
+# Load your trained model
+model = YOLO('/content/drive/MyDrive/Dataset_3/Dataset_3/motherboard_model2/weights/best.pt')
 
+# Paths to test images
+image_paths = [
+    '/content/drive/MyDrive/Dataset_3/Dataset_3/Project3Data/data/evaluation/ardmega.jpg',
+    '/content/drive/MyDrive/Dataset_3/Dataset_3/Project3Data/data/evaluation/arduno.jpg',
+    '/content/drive/MyDrive/Dataset_3/Dataset_3/Project3Data/data/evaluation/rasppi.jpg'
+]
+
+# Run inference without specifying save_dir (let YOLO decide the directory)
+results = [model.predict(source=img, save=True, conf=0.5) for img in image_paths]
+
+# Determine the latest YOLO save directory
+latest_run_dir = 'runs/detect/' + sorted(os.listdir('runs/detect/'))[-1]  # Get the most recent directory
+print(f"Latest YOLO save directory: {latest_run_dir}")
+
+# List all saved files
+saved_files = os.listdir(latest_run_dir)
+print("Saved files:", saved_files)
+
+# Display the output images
+for file in saved_files:
+    if file.endswith(".jpg"):  # Ensure only images are displayed
+        display(Image(filename=os.path.join(latest_run_dir, file)))
 
 
 
