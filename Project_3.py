@@ -61,11 +61,35 @@ x, y, w, h = cv2.boundingRect(max(filtered_contours, key = cv2.contourArea))
 cropped_image = extracted_image[y:y+h, x:x+w]
 # crop the image to tightly fit the motherboard so you don't see the rest of the background
 
-# Display the final result
-plt.figure(figsize=(8, 8))
-plt.title("Final Extracted Motherboard Image")
+# Display the results in a 2x2 grid
+plt.figure(figsize = (12, 12))  
+
+# Edge detection visualization
+plt.subplot(2, 2, 1)
+edges = cv2.Canny(gray_eq, 50, 150)  
+plt.title("Edge Detection", fontsize = 20)
+plt.imshow(edges, cmap = 'gray')
+plt.axis('off')
+
+# Mask image
+plt.subplot(2, 2, 2)
+plt.title("Mask Image", fontsize = 20)
+plt.imshow(mask, cmap = 'gray')
+plt.axis('off')
+
+# Eroded Mask
+plt.subplot(2, 2, 3)
+plt.title("Eroded Mask", fontsize = 20)
+plt.imshow(eroded_mask, cmap = 'gray')
+plt.axis('off')
+
+# Final extracted image
+plt.subplot(2, 2, 4)
+plt.title("Final Extracted Image", fontsize = 20)
 plt.imshow(cv2.cvtColor(cropped_image, cv2.COLOR_BGR2RGB))
-plt.axis("off")
+plt.axis('off')
+
+plt.tight_layout()
 plt.show()
 
 '''Installing Ultralytics for Google Colab'''
@@ -81,16 +105,17 @@ model = YOLO('yolov8n.pt')
 
 # Train the model
 model.train(
-    data = '/content/drive/MyDrive/Dataset_3/Project3Data/data/data.yaml',
-    epochs = 150,                    # epochs
-    batch  = 8,                     # batch size
-    imgsz  = 900,                    # image size
-    lr0 = 0.0003,                    # learning rate
-    optimizer = 'AdamW',             # optimizer
-    weight_decay = 0.001,            # Regularization
+    data = '/content/drive/MyDrive/Dataset_3/Dataset_3/Project3Data/data/data.yaml',
+    epochs = 200,                   
+    batch  = 8,                     
+    imgsz  = 960,                    
+    lr0 = 0.0005,   
+    lrf = 0.01,                 
+    optimizer = 'AdamW',             
+    weight_decay = 0.0005,            
     augment = True,
     amp = True,
-    name = '/content/drive/MyDrive/Dataset_3/motherboard_model'
+    name = '/content/drive/MyDrive/Dataset_3/Dataset_3/motherboard_mode'
 )
 
 '''Step 3: YOLOv8 Evaluation'''
@@ -100,7 +125,7 @@ from IPython.display import Image, display
 import os
 
 # Load your trained model
-model = YOLO('/content/drive/MyDrive/Dataset_3/Dataset_3/motherboard_model2/weights/best.pt')
+model = YOLO('/content/drive/MyDrive/Dataset_3/Dataset_3/motherboard_model/weights/best.pt')
 
 # Paths to test images
 image_paths = [
@@ -109,8 +134,17 @@ image_paths = [
     '/content/drive/MyDrive/Dataset_3/Dataset_3/Project3Data/data/evaluation/rasppi.jpg'
 ]
 
-# Run inference without specifying save_dir (let YOLO decide the directory)
-results = [model.predict(source=img, save=True, conf=0.5) for img in image_paths]
+# Custom line width and text size
+custom_args = {
+    'line_width': 3,  # Thinner bounding box lines
+    'font_size': 3  # Smaller font size for labels
+}
+
+# Run inference with smaller text and line width
+results = [
+    model.predict(source = img, save = True, conf = 0.5, line_width = custom_args['line_width'], imgsz = 640)
+    for img in image_paths
+]
 
 # Determine the latest YOLO save directory
 latest_run_dir = 'runs/detect/' + sorted(os.listdir('runs/detect/'))[-1]  # Get the most recent directory
@@ -123,7 +157,7 @@ print("Saved files:", saved_files)
 # Display the output images
 for file in saved_files:
     if file.endswith(".jpg"):  # Ensure only images are displayed
-        display(Image(filename=os.path.join(latest_run_dir, file)))
+        display(Image(filename = os.path.join(latest_run_dir, file)))
 
 
 
